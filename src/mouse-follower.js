@@ -12,6 +12,12 @@ class MouseFollower {
     initialized = false;
 
     /**
+     * @type HTMLDivElement
+     * @description The Mouse Follower Element
+     */
+    cursorEl;
+
+    /**
      * @constructor
      * @param conf Provided config Object
      */
@@ -59,6 +65,7 @@ class MouseFollower {
             el.style.boxShadow = '0px 0px 5px ' + this.conf.blurRadius.toString() + 'px ' + this.conf.blurColor;
 
         document.querySelector(this.conf.container).appendChild(el);
+        this.cursorEl = el;
         this.initialized = true;
     }
 
@@ -68,16 +75,25 @@ class MouseFollower {
      * @param event
      * @returns {Promise<void>}
      */
-    async move(event) {
+    move(event) {
         if (!this.initialized) return;
         let mouse = {
-            x: event.clientX - Math.round(this.conf.size / 2),
-            y: event.clientY - Math.round(this.conf.size / 2)
+            x: event.clientX - ~~(this.conf.size / 2),
+            y: event.clientY - ~~(this.conf.size / 2)
         };
-        await this.sleep(this.conf.timeout);
-        let el = document.getElementById('mouse_cursor');
-        el.style.left = mouse.x.toString() + 'px';
-        el.style.top = mouse.y.toString() + 'px';
+        if (this.conf.timeout > 0) {
+            this.sleep(this.conf.timeout)
+                .then(() => {
+                    let el = this.cursorEl;
+                    el.style.left = mouse.x.toString() + 'px';
+                    el.style.top = mouse.y.toString() + 'px';
+                })
+        }
+        else {
+            let el = this.cursorEl;
+            el.style.left = mouse.x.toString() + 'px';
+            el.style.top = mouse.y.toString() + 'px';
+        }
     }
 
     /**
